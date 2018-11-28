@@ -1,7 +1,11 @@
 //#define USEBOOTMESSAGE //uncoment this to have welcome message based on data from RTC
 
-//Include FIS Writer, TimeLib and KWP
-#include "VW2002FISWriter.h"
+//#define USEBOOTMESSAGE //uncoment this to have welcome message based on data from RTC
+//download library from here: https://github.com/tomaskovacik/VAGFISWriter
+//install it according arduino how-to https://www.arduino.cc/en/Guide/Libraries
+//I mean just download zip and extract in arduino/libraries/ ;)
+#include "VAGFISWriter.h"
+
 
 //download libray from here: https://github.com/marcobrianza/ClickButton
 //install it according arduino how-to https://www.arduino.cc/en/Guide/Libraries
@@ -71,7 +75,7 @@ KWP_MODULE dashboard = {"CLUSTER", ADR_Dashboard, dashboardGroups, NDASHBOARDGRO
 KWP_MODULE *modules[NMODULES] = { &engine, &dashboard };// &_abs, &airbag};
 KWP_MODULE *currentModule = modules[0];
 
-VW2002FISWriter fisWriter(FIS_CLK, FIS_DATA, FIS_ENA);
+VAGFISWriter fisWriter(FIS_CLK, FIS_DATA, FIS_ENA);
 #ifdef USEBOOTMESSAGE
 GetBootMessage getBootMessage;
 #endif
@@ -130,7 +134,7 @@ void setup()
   fisBeenToggled = false;
   fetchedData = false;
   kwp.disconnect();
-  fisWriter.remove_graphic();
+  fisWriter.reset();
 
   long current_millis = (long)millis();
   long lastRefreshTime = current_millis;
@@ -174,7 +178,7 @@ void loop()
     fetchedData = false;
     maxAttemptsCountModule = 1;
     kwp.disconnect();
-    fisWriter.remove_graphic();
+    fisWriter.reset();
     return;
   }
 
@@ -189,7 +193,7 @@ void loop()
     fetchedData = false;
     maxAttemptsCountModule = 1;
     kwp.disconnect();
-    fisWriter.remove_graphic();
+    fisWriter.reset();
   }
 
   //If the ignition is currently "on" then work out the message
@@ -223,7 +227,7 @@ void loop()
         currentModule = modules[0];                       //reset the currentModule to 0
         intCurrentModule = 0;                             //reset the intCurrentModule to 0 too
         kwp.disconnect();                                 //disconnect kwp
-        fisWriter.init_graphic();                         //clear the screen
+        fisWriter.initFullScreen();                         //clear the screen
         return;                                           //return (to bounce back to the start.  Issues otherwise).
       }
       else
@@ -232,7 +236,7 @@ void loop()
         intCurrentModule++;
         currentModule = modules[intCurrentModule];
         kwp.disconnect();
-        fisWriter.init_graphic();
+        fisWriter.initFullScreen();
         return;
       }
     }
@@ -245,7 +249,7 @@ void loop()
         currentGroup = 0;
         fisLine1 = ""; fisLine2 = ""; fisLine3 = ""; fisLine4 = ""; fisLine5 = ""; fisLine6 = ""; fisLine7 = ""; fisLine8 = ""; //empty the lines from previous
         fetchedData = false;
-        fisWriter.init_graphic();
+        fisWriter.initFullScreen();
         return;
       }
       else
@@ -254,7 +258,7 @@ void loop()
         currentGroup++;
         fisLine1 = ""; fisLine2 = ""; fisLine3 = ""; fisLine4 = ""; fisLine5 = ""; fisLine6 = ""; fisLine7 = ""; fisLine8 = ""; //empty the lines from previous
         fetchedData = false;
-        fisWriter.init_graphic();
+        fisWriter.initFullScreen();
         return;
       }
     }
@@ -275,7 +279,7 @@ void loop()
       fisLine1 = ""; fisLine2 = ""; fisLine3 = ""; fisLine4 = ""; fisLine5 = ""; fisLine6 = ""; fisLine7 = ""; fisLine8 = ""; //empty the lines from previous
       nGroupsCustom = 1;
       fetchedData = false;
-      fisWriter.init_graphic();
+      fisWriter.initFullScreen();
       return;
     }
 
@@ -286,7 +290,7 @@ void loop()
         currentGroup = NENGINEGROUPS - 1;
         fisLine1 = ""; fisLine2 = ""; fisLine3 = ""; fisLine4 = ""; fisLine5 = ""; fisLine6 = ""; fisLine7 = ""; fisLine8 = ""; //empty the lines from previous
         fetchedData = false;
-        fisWriter.init_graphic();
+        fisWriter.initFullScreen();
         return;
       }
       else
@@ -294,7 +298,7 @@ void loop()
         currentGroup--;
         fisLine1 = ""; fisLine2 = ""; fisLine3 = ""; fisLine4 = ""; fisLine5 = ""; fisLine6 = ""; fisLine7 = ""; fisLine8 = ""; //empty the lines from previous
         fetchedData = false;
-        fisWriter.init_graphic();
+        fisWriter.initFullScreen();
         return;
       }
     }
@@ -304,7 +308,7 @@ void loop()
     {
       if ((maxAttemptsCountModule > maxAttemptsModule) && ignitionStateRunOnce)
       {
-        fisWriter.remove_graphic();
+        fisWriter.reset();
       }
 
       if ((maxAttemptsCountModule <= maxAttemptsModule) && ignitionStateRunOnce)
@@ -312,12 +316,12 @@ void loop()
         //Reconnect quietly if already connected (don't show that you're reconnecting!)
         if (!successfulConnNoDrop)
         {
-          fisWriter.FIS_init(); delay(delayTime);
-          fisWriter.init_graphic(); delay(delayTime);
+          fisWriter.begin(); delay(delayTime);
+          fisWriter.initFullScreen(); delay(delayTime);
 
-          fisWriter.write_text_full(0, 24, "CONNECTING TO:"); delay(delayTime);
-          fisWriter.write_text_full(0, 32, currentModule->name); delay(delayTime);
-          fisWriter.write_text_full(0, 48, "ATTEMPT " + String(maxAttemptsCountModule) + "/" + String(maxAttemptsModule)); delay(delayTime);
+          fisWriter.sendStringFS(0, 24, "CONNECTING TO:"); delay(delayTime);
+          fisWriter.sendStringFS(0, 32, currentModule->name); delay(delayTime);
+          fisWriter.sendStringFS(0, 48, "ATTEMPT " + String(maxAttemptsCountModule) + "/" + String(maxAttemptsModule)); delay(delayTime);
         }
 
         if (kwp.connect(currentModule->addr, 10400))
@@ -336,9 +340,9 @@ void loop()
       //If the first connection was successful, don't show reconnects!
       if (!successfulConnNoDrop)
       {
-        fisWriter.init_graphic();
-        fisWriter.write_text_full(0, 24, "CONNECTED TO:"); delay(5);
-        fisWriter.write_text_full(0, 32, currentModule->name); delay(5);
+        fisWriter.initFullScreen();
+        fisWriter.sendStringFS(0, 24, "CONNECTED TO:"); delay(5);
+        fisWriter.sendStringFS(0, 32, currentModule->name); delay(5);
         delay(500);
         successfulConnNoDrop = true;
       }
@@ -358,24 +362,24 @@ void loop()
           if ((fisLine3.length() > 1) && (fisLine4.length() > 1) && (fisLine5.length() > 1) && (fisLine6.length() > 1) && fetchedData == false)
           {
             fetchedData = true;
-            fisWriter.init_graphic();
+            fisWriter.initFullScreen();
           }
 
           if ((fisLine3.length() > 1) && (fisLine4.length() > 1) && (fisLine5.length() > 1) && (fisLine6.length() > 1) && fetchedData == true)
           {
-            fisWriter.write_text_full(0, 8, "BLOCK " + String(engineGroups[currentGroup]));
-            fisWriter.write_text_full(0, 16, resultBlock[currentSensor].desc);
+            fisWriter.sendStringFS(0, 8, "BLOCK " + String(engineGroups[currentGroup]));
+            fisWriter.sendStringFS(0, 16, resultBlock[currentSensor].desc);
             //only write lines 3, 4, 5, 6 (middle of screen) for neatness
           
-            fisWriter.write_text_full(0, 40, fisLine3); delay(delayTime);
-            fisWriter.write_text_full(0, 48, fisLine4); delay(delayTime);
-            fisWriter.write_text_full(0, 56, fisLine5); delay(delayTime);
-            fisWriter.write_text_full(0, 64, fisLine6); delay(delayTime);
+            fisWriter.sendStringFS(0, 40, fisLine3); delay(delayTime);
+            fisWriter.sendStringFS(0, 48, fisLine4); delay(delayTime);
+            fisWriter.sendStringFS(0, 56, fisLine5); delay(delayTime);
+            fisWriter.sendStringFS(0, 64, fisLine6); delay(delayTime);
           }
           else
           {
-            fisWriter.write_text_full(0, 48, "FETCHING DATA"); delay(delayTime);
-            fisWriter.write_text_full(0, 56, "PLEASE WAIT..."); delay(delayTime);
+            fisWriter.sendStringFS(0, 48, "FETCHING DATA"); delay(delayTime);
+            fisWriter.sendStringFS(0, 56, "PLEASE WAIT..."); delay(delayTime);
           }
 
           if (resultBlock[0].value != "") {
@@ -411,25 +415,25 @@ void loop()
           if ((fisLine2.length() > 1) && (fisLine4.length() > 1) && (fisLine5.length() > 1) && (fisLine6.length() > 1) && (fisLine7.length() > 1) && (fisLine8.length() > 1) && fetchedData == false)
           {
             fetchedData = true;
-            fisWriter.init_graphic();
+            fisWriter.initFullScreen();
           }
 
           if ((fisLine2.length() > 1) && (fisLine4.length() > 1) && (fisLine5.length() > 1) && (fisLine6.length() > 1) && (fisLine7.length() > 1) && (fisLine8.length() > 1) && fetchedData == true)
           {
-            fisWriter.write_text_full(0, 8, "CUSTOM BLOCK"); delay(delayTime);
-            fisWriter.write_text_full(0, 16, "AIT & KNOCK"); delay(delayTime);
-            fisWriter.write_text_full(0, 32, fisLine2); delay(delayTime);
-            fisWriter.write_text_full(0, 48, fisLine4); delay(delayTime);
-            fisWriter.write_text_full(0, 56, fisLine5); delay(delayTime);
-            fisWriter.write_text_full(0, 64, fisLine6); delay(delayTime);
-            fisWriter.write_text_full(0, 72, fisLine7); delay(delayTime);
-            fisWriter.write_text_full(0, 80, fisLine8); delay(delayTime);
+            fisWriter.sendStringFS(0, 8, "CUSTOM BLOCK"); delay(delayTime);
+            fisWriter.sendStringFS(0, 16, "AIT & KNOCK"); delay(delayTime);
+            fisWriter.sendStringFS(0, 32, fisLine2); delay(delayTime);
+            fisWriter.sendStringFS(0, 48, fisLine4); delay(delayTime);
+            fisWriter.sendStringFS(0, 56, fisLine5); delay(delayTime);
+            fisWriter.sendStringFS(0, 64, fisLine6); delay(delayTime);
+            fisWriter.sendStringFS(0, 72, fisLine7); delay(delayTime);
+            fisWriter.sendStringFS(0, 80, fisLine8); delay(delayTime);
           }
           else
           {
-            fisWriter.write_text_full(0, 48, "FETCHING DATA"); delay(delayTime);
-            fisWriter.write_text_full(0, 56, "PLEASE WAIT..."); delay(delayTime);
-            //fisWriter.init_graphic();
+            fisWriter.sendStringFS(0, 48, "FETCHING DATA"); delay(delayTime);
+            fisWriter.sendStringFS(0, 56, "PLEASE WAIT..."); delay(delayTime);
+            //fisWriter.initFullScreen();
           }
 
           //first run will be case 0 (since nGroupsCustom = 1).  Prepare for the NEXT run (which will be group 2 (AIT/timing)).
@@ -477,7 +481,7 @@ void loop()
     fetchedData = false;
     maxAttemptsCountModule = 1;
     kwp.disconnect();
-    fisWriter.remove_graphic();
+    fisWriter.reset();
 
     //Force HIGH on all the return pins
     Serial.println("Disabled.  Force pins HIGH");
