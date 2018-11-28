@@ -3,22 +3,25 @@
 
 #define DEBUG_LEVEL 1
 
-KWP::KWP(uint8_t receivePin, uint8_t transmitPin){
-  _OBD_RX_PIN = receivePin;
-  _OBD_TX_PIN = transmitPin;
 
-  pinMode(transmitPin, OUTPUT);
-  digitalWrite(transmitPin, HIGH);
+#if defined(USE_SW_SERIAL)
+#if ARDUINO >= 100
+KWP::KWP(SoftwareSerial *ser)
+#else
+KWP::KWP(NewSoftSerial *ser)
+#endif
+#else
+KWP::KWP(HardwareSerial *ser)
+#endif
+{
 
-  obd = new SoftwareSerial(receivePin, transmitPin, false); // RX, TX, inverse logic
-
-  #ifdef DEBUG_LEVEL
+ #ifdef DEBUG_LEVEL
     Serial.println(F("KWP created"));
   #endif
 }
 
 KWP::~KWP(){
-  delete obd;
+  obd->end();
   obd = NULL;
 }
 

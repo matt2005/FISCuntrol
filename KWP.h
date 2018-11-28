@@ -4,7 +4,16 @@
 #include <inttypes.h>
 #include <Arduino.h>
 
-#include "SoftwareSerial.h"
+//#define USE_SW_SERIAL
+
+#if defined(USE_SW_SERIAL)
+#if ARDUINO >= 100
+#include <SoftwareSerial.h>
+#else
+#include <NewSoftSerial.h>
+#endif
+#endif
+
 
 #define ADR_Engine 0x01 // Engine
 #define ADR_Gears  0x02 // Auto Trans
@@ -33,7 +42,15 @@ struct SENSOR {
 
 class KWP {
   public:
-    KWP(uint8_t receivePin, uint8_t transmitPin);
+#if defined(USE_SW_SERIAL)
+#if ARDUINO >= 100
+    KWP(SoftwareSerial *ser);
+#else
+    KWP(NewSoftSerial  *ser);
+#endif
+#else
+    KWP(HardwareSerial *ser);
+#endif
     ~KWP();
     bool connect(uint8_t addr, int baudrate);
     void disconnect();
@@ -50,8 +67,16 @@ class KWP {
     uint8_t blockCounter = 0;
     uint8_t errorTimeout = 0;
     uint8_t errorData = 0;
-
+    
+#if  defined(USE_SW_SERIAL)
+#if ARDUINO >= 100
     SoftwareSerial *obd;
+#else
+    NewSoftSerial  *obd;
+#endif
+#else
+    HardwareSerial *obd;
+#endif
 
     void obdWrite(uint8_t data);
     uint8_t obdRead();
