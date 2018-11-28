@@ -12,7 +12,7 @@ extern String GreetingMessage6;
 extern String GreetingMessage7;
 extern String GreetingMessage8;
 
-extern class VW2002FISWriter fisWriter;
+extern class VAGFISWriter fisWriter;
 extern class RTC_DS1307 rtc_time;
 extern class RTC_Millis rtc;
 
