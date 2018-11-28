@@ -1,7 +1,11 @@
+//#define USEBOOTMESSAGE //uncoment this to have welcome message based on data from RTC
+
 //Include FIS Writer, TimeLib and KWP
 #include "VW2002FISWriter.h"
 #include "KWP.h"
+#ifdef USEBOOTMESSAGE
 #include "GetBootMessage.h"
+#endif
 #include "GetButtonClick.h"
 
 // KWP.  RX = Pin 2, TX = Pin 3
@@ -61,7 +65,9 @@ KWP_MODULE *modules[NMODULES] = { &engine, &dashboard };// &_abs, &airbag};
 KWP_MODULE *currentModule = modules[0];
 
 VW2002FISWriter fisWriter(FIS_CLK, FIS_DATA, FIS_ENA);
+#ifdef USEBOOTMESSAGE
 GetBootMessage getBootMessage;
+#endif
 GetButtonClick stalkPushUpButton(stalkPushUp, LOW, CLICKBTN_PULLUP);
 GetButtonClick stalkPushDownButton(stalkPushDown, LOW, CLICKBTN_PULLUP);
 GetButtonClick stalkPushResetButton(stalkPushReset, LOW, CLICKBTN_PULLUP);
@@ -182,11 +188,12 @@ void loop()
   //If the ignition is currently "on" then work out the message
   if (ignitionState == HIGH && !ignitionStateRunOnce) //&& !fisBeenToggled)
   {
+#ifdef USEBOOTMESSAGE
     Serial.println("Return & Display Boot Message");
     getBootMessage.returnBootMessage();         //find out the boot message
     //getBootMessage.displayBootImage();        //display the boot message
     getBootMessage.displayBootMessage();    //TODO: build graph support!
-
+#endif
     ignitionStateRunOnce = true;            //set it's been ran, to stop redisplay of welcome message until ign. off.
   }
 
