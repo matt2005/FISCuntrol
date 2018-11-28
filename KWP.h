@@ -4,7 +4,7 @@
 #include <inttypes.h>
 #include <Arduino.h>
 
-#include "NewSoftwareSerial.h"
+#include "SoftwareSerial.h"
 
 #define ADR_Engine 0x01 // Engine
 #define ADR_Gears  0x02 // Auto Trans
@@ -51,7 +51,7 @@ class KWP {
     uint8_t errorTimeout = 0;
     uint8_t errorData = 0;
 
-    NewSoftwareSerial *obd;
+    SoftwareSerial *obd;
 
     void obdWrite(uint8_t data);
     uint8_t obdRead();
