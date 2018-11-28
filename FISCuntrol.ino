@@ -2,11 +2,18 @@
 
 //Include FIS Writer, TimeLib and KWP
 #include "VW2002FISWriter.h"
+
+//download libray from here: https://github.com/marcobrianza/ClickButton
+//install it according arduino how-to https://www.arduino.cc/en/Guide/Libraries
+//I mean just download zip and extract in arduino/libraries/ ;)
+#include "ClickButton.h"
+
 #include "KWP.h"
+
 #ifdef USEBOOTMESSAGE
 #include "GetBootMessage.h"
 #endif
-#include "GetButtonClick.h"
+
 
 // KWP.  RX = Pin 2, TX = Pin 3
 #define pinKLineRX 12
@@ -68,9 +75,9 @@ VW2002FISWriter fisWriter(FIS_CLK, FIS_DATA, FIS_ENA);
 #ifdef USEBOOTMESSAGE
 GetBootMessage getBootMessage;
 #endif
-GetButtonClick stalkPushUpButton(stalkPushUp, LOW, CLICKBTN_PULLUP);
-GetButtonClick stalkPushDownButton(stalkPushDown, LOW, CLICKBTN_PULLUP);
-GetButtonClick stalkPushResetButton(stalkPushReset, LOW, CLICKBTN_PULLUP);
+ClickButton stalkPushUpButton(stalkPushUp, LOW, CLICKBTN_PULLUP);
+ClickButton stalkPushDownButton(stalkPushDown, LOW, CLICKBTN_PULLUP);
+ClickButton stalkPushResetButton(stalkPushReset, LOW, CLICKBTN_PULLUP);
 
 bool ignitionState = false;         // variable for reading the ignition pin status
 bool ignitionStateRunOnce = false;  // variable for reading the first run loop
