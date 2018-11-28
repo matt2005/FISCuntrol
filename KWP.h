@@ -4,7 +4,7 @@
 #include <inttypes.h>
 #include <Arduino.h>
 
-//#define USE_SW_SERIAL
+#define USE_SW_SERIAL
 
 #if defined(USE_SW_SERIAL)
 #if ARDUINO >= 100

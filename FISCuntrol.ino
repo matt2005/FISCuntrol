@@ -29,7 +29,11 @@
 #define stalkPushResetMonitor A2          // input stalk RESET (to monitor when FIS Disabled)
 //use relay here with normaly closed contacts, in case you have to emergency disconect power to fiscuntrol original connections are automaticaly restored
 //I checked, no small 3/4 contacs relay on market, every one I found was like 3cm tall, but I give it only 15minuts search.
-
+//left/right buttons are ignored by my audi cluster, so they can be stay connected, and only cut wire for reset button?
+//are it is really needed? cannot this be somehow implemented ? probably yes:
+//we know how many screens original cluster actualy has, so we can cound and we are over, we can step in and act like next page, leaveng everything stock :)
+//just like that, easy, right? :D
+ 
 #define stalkPushUpReturn A3       // if FIS disable - use this to match stalk UP
 #define stalkPushDownReturn A4    // if FIS disable - use this to match stalk DOWN
 #define stalkPushResetReturn A5  // if F`IS disable - use this to match stalk RESET
@@ -104,10 +108,10 @@ KWP_MODULE *currentModule = modules[0];
 #define pinKLineTX 13
 //comment this for HW serial
 //do not forget to commentout/remove line in KWP.h: #define USE_SW_SERIAL
-//SoftwareSerial swSerial(pinKLineRX, pinKLineTX); //rxPin, txPin, inverse_logic
-//KWP kwp(&swSerial);
+SoftwareSerial swSerial(pinKLineRX, pinKLineTX); //rxPin, txPin, inverse_logic
+KWP kwp(&swSerial);
 //uncoment for using HW Serial,do not forget to commentout/remove line in KWP.h: #define USE_SW_SERIAL
-KWP kwp(&Serial1);
+//KWP kwp(&Serial1);
 
 VAGFISWriter fisWriter(FIS_CLK, FIS_DATA, FIS_ENA);
 #ifdef USEBOOTMESSAGE
