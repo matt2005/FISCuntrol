@@ -13,13 +13,6 @@
 
 #include "KWP.h"
 
-// KWP.  RX = Pin 2, TX = Pin 3
-#define pinKLineRX 12
-#define pinKLineTX 13
-KWP kwp(pinKLineRX, pinKLineTX);
-
-
-
 #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega328__)
 /*
  * arduino's based on atmega328XX chips
@@ -105,6 +98,16 @@ KWP_MODULE dashboard = {"CLUSTER", ADR_Dashboard, dashboardGroups, NDASHBOARDGRO
 //define modules
 KWP_MODULE *modules[NMODULES] = { &engine, &dashboard };// &_abs, &airbag};
 KWP_MODULE *currentModule = modules[0];
+
+// KWP.  RX = Pin 2, TX = Pin 3
+#define pinKLineRX 12
+#define pinKLineTX 13
+//comment this for HW serial
+//do not forget to commentout/remove line in KWP.h: #define USE_SW_SERIAL
+//SoftwareSerial swSerial(pinKLineRX, pinKLineTX); //rxPin, txPin, inverse_logic
+//KWP kwp(&swSerial);
+//uncoment for using HW Serial,do not forget to commentout/remove line in KWP.h: #define USE_SW_SERIAL
+KWP kwp(&Serial1);
 
 VAGFISWriter fisWriter(FIS_CLK, FIS_DATA, FIS_ENA);
 #ifdef USEBOOTMESSAGE
