@@ -1,6 +1,5 @@
 //#define USEBOOTMESSAGE //uncoment this to have welcome message based on data from RTC
 
-//#define USEBOOTMESSAGE //uncoment this to have welcome message based on data from RTC
 //download library from here: https://github.com/tomaskovacik/VAGFISWriter
 //install it according arduino how-to https://www.arduino.cc/en/Guide/Libraries
 //I mean just download zip and extract in arduino/libraries/ ;)
@@ -14,15 +13,47 @@
 
 #include "KWP.h"
 
-#ifdef USEBOOTMESSAGE
-#include "GetBootMessage.h"
-#endif
-
-
 // KWP.  RX = Pin 2, TX = Pin 3
 #define pinKLineRX 12
 #define pinKLineTX 13
 KWP kwp(pinKLineRX, pinKLineTX);
+
+
+
+#if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega328__)
+/*
+ * arduino's based on atmega328XX chips
+ */
+//this fits only in arduino Mega, or? need to more tidy up
+#undef USEBOOTMESSAGE
+ 
+#define stalkPushUp A0             // input stalk UP
+#define stalkPushDown A1           // input stalk DOWN
+#define stalkPushReset A2          // input stalk RESET
+
+#define stalkPushUpMonitor A0             // input stalk UP (to monitor when FIS Disabled)
+#define stalkPushDownMonitor A1           // input stalk DOWN (to monitor when FIS Disabled)
+#define stalkPushResetMonitor A2          // input stalk RESET (to monitor when FIS Disabled)
+//use relay here with normaly closed contacts, in case you have to emergency disconect power to fiscuntrol original connections are automaticaly restored
+//I checked, no small 3/4 contacs relay on market, every one I found was like 3cm tall, but I give it only 15minuts search.
+
+#define stalkPushUpReturn A3       // if FIS disable - use this to match stalk UP
+#define stalkPushDownReturn A4    // if FIS disable - use this to match stalk DOWN
+#define stalkPushResetReturn A5  // if F`IS disable - use this to match stalk RESET
+
+//FIS connections:
+#define FIS_CLK 13  // - Arduino 13 - PB5
+#define FIS_DATA 11 // - Arduino 11 - PB3
+#define FIS_ENA 2 // -Arduino pin 2 - INT0, cose you know, one day it will be not so stupid it will be INTERRUPT DRIVEN! I mean fiswriter lib :D
+#else
+/*
+ * for arduino mega ... 
+ */
+
+//this fits only in arduino Mega, or? need to more tidy up ...
+#ifdef USEBOOTMESSAGE
+#include "GetBootMessage.h"
+#endif
 
 #define stalkPushUp 24             // input stalk UP
 #define stalkPushDown 23           // input stalk DOWN
@@ -34,20 +65,20 @@ KWP kwp(pinKLineRX, pinKLineTX);
 
 #define stalkPushUpReturn 30       // if FIS disable - use this to match stalk UP
 #define stalkPushDownReturn 31    // if FIS disable - use this to match stalk DOWN
-#define stalkPushResetReturn 32
-// if F`IS disable - use this to match stalk RESET
+#define stalkPushResetReturn 32  // if F`IS disable - use this to match stalk RESET
 
-//Define ignition live sense as Pin 7
-#define ignitionMonitorPin 10
-
-// FIS
-//#define FIS_CLK 13  // - Arduino 13 - PB5
-//#define FIS_DATA 11 // - Arduino 11 - PB3
-//#define FIS_ENA 8 // - Arduino 8 - PB0
-
+//FIS connections
 #define FIS_CLK 52  // - Arduino 13 - PB5
 #define FIS_DATA 51 // - Arduino 11 - PB3
 #define FIS_ENA 53   // - Arduino 8 - PB0
+
+#endif
+
+// if F`IS disable - use this to match stalk RESET
+
+// Define ignition live sense as Pin 7
+// connect to Xrelay via resistor divider? can be .... some protection is in place
+#define ignitionMonitorPin 10
 
 //Define MAX Retries2
 #define NENGINEGROUPS 20
