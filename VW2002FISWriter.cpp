@@ -1,5 +1,5 @@
 #include "VW2002FISWriter.h"
-#include <MemoryFree.h>
+//#include <MemoryFree.h>
 #include <Arduino.h>
 
 // #define ENABLE_IRQ 1
