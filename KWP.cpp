@@ -10,7 +10,7 @@ KWP::KWP(uint8_t receivePin, uint8_t transmitPin){
   pinMode(transmitPin, OUTPUT);
   digitalWrite(transmitPin, HIGH);
 
-  obd = new SoftwareSerial(receivePin, transmitPin, false); // RX, TX, inverse logic
+  obd = new NewSoftwareSerial(receivePin, transmitPin, false); // RX, TX, inverse logic
 
   #ifdef DEBUG_LEVEL
     Serial.println(F("KWP created"));
