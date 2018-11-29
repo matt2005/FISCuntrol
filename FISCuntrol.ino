@@ -14,9 +14,7 @@
 #include "KWP.h"
 
 // KWP.  RX = Pin 2, TX = Pin 3
-#define pinKLineRX 12
-#define pinKLineTX 13
-KWP kwp(pinKLineRX, pinKLineTX);
+
 
 
 
@@ -45,6 +43,11 @@ KWP kwp(pinKLineRX, pinKLineTX);
 #define FIS_CLK 13  // - Arduino 13 - PB5
 #define FIS_DATA 11 // - Arduino 11 - PB3
 #define FIS_ENA 2 // -Arduino pin 2 - INT0, cose you know, one day it will be not so stupid it will be INTERRUPT DRIVEN! I mean fiswriter lib :D
+
+//KWP
+#define pinKLineRX 6
+#define pinKLineTX 7
+
 #else
 /*
  * for arduino mega ... 
@@ -71,6 +74,10 @@ KWP kwp(pinKLineRX, pinKLineTX);
 #define FIS_CLK 52  // - Arduino 13 - PB5
 #define FIS_DATA 51 // - Arduino 11 - PB3
 #define FIS_ENA 53   // - Arduino 8 - PB0
+
+//KWP
+#define pinKLineRX 12
+#define pinKLineTX 13
 
 #endif
 
@@ -105,6 +112,8 @@ KWP_MODULE dashboard = {"CLUSTER", ADR_Dashboard, dashboardGroups, NDASHBOARDGRO
 //define modules
 KWP_MODULE *modules[NMODULES] = { &engine, &dashboard };// &_abs, &airbag};
 KWP_MODULE *currentModule = modules[0];
+
+KWP kwp(pinKLineRX, pinKLineTX);
 
 VAGFISWriter fisWriter(FIS_CLK, FIS_DATA, FIS_ENA);
 #ifdef USEBOOTMESSAGE
